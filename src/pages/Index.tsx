@@ -1,3 +1,5 @@
+
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import BlogCard from "@/components/BlogCard";
 import Footer from "@/components/Footer";
@@ -113,7 +115,9 @@ const Index = () => {
                   <span className="mx-2">•</span>
                   <span>{FEATURED_POST.date}</span>
                 </div>
-                <Button size="lg" className="self-start">Read More</Button>
+                <Link to={`/blog/${FEATURED_POST.slug}`}>
+                  <Button size="lg" className="self-start">Read More</Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -123,7 +127,9 @@ const Index = () => {
         <div>
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl font-bold">Latest Stories</h2>
-            <Button variant="outline" size="lg">View All</Button>
+            <Link to="/blog">
+              <Button variant="outline" size="lg">View All</Button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {BLOG_POSTS.map((post) => (

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 
 interface BlogCardProps {
@@ -22,14 +23,16 @@ const BlogCard = ({ title, excerpt, image, author, date, categories, slug }: Blo
           />
         </div>
         <div className="p-6">
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-2 mb-3 flex-wrap">
             {categories.map((category) => (
-              <span
+              <Link 
+                to={`/category/${category.toLowerCase().replace(' ', '-')}`}
                 key={category}
-                className="text-xs font-medium px-2 py-1 bg-blue-50 text-primary rounded-full"
+                className="text-xs font-medium px-2 py-1 bg-blue-50 text-primary rounded-full hover:bg-blue-100 transition-colors"
+                onClick={(e) => e.stopPropagation()}
               >
                 {category}
-              </span>
+              </Link>
             ))}
           </div>
           <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">
