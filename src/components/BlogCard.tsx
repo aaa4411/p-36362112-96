@@ -26,7 +26,7 @@ const BlogCard = ({ title, excerpt, image, author, date, categories, slug }: Blo
           <div className="flex gap-2 mb-3 flex-wrap">
             {categories.map((category) => (
               <Link 
-                to={`/category/${category.toLowerCase().replace(' ', '-')}`}
+                to={`/category/${category.toLowerCase().replace(/ /g, '-')}`}
                 key={category}
                 className="text-xs font-medium px-2 py-1 bg-blue-50 text-primary rounded-full hover:bg-blue-100 transition-colors"
                 onClick={(e) => e.stopPropagation()}
