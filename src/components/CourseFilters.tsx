@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Check, ChevronsUpDown, Filter } from "lucide-react";
+import React, { useState } from "react";
+import { Check, ChevronsUpDown, Filter, Search, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -15,6 +15,13 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type FilterOption = {
   value: string;
@@ -88,9 +95,11 @@ export type CourseFiltersProps = {
   selectedLevel: string;
   selectedDepartment: string;
   selectedCredits: string;
+  searchQuery: string;
   onLevelChange: (level: string) => void;
   onDepartmentChange: (department: string) => void;
   onCreditsChange: (credits: string) => void;
+  onSearchChange: (search: string) => void;
   onClearFilters: () => void;
 };
 
@@ -101,12 +110,20 @@ const CourseFilters = ({
   selectedLevel,
   selectedDepartment,
   selectedCredits,
+  searchQuery,
   onLevelChange,
   onDepartmentChange,
   onCreditsChange,
+  onSearchChange,
   onClearFilters,
 }: CourseFiltersProps) => {
-  const hasActiveFilters = selectedLevel || selectedDepartment || selectedCredits;
+  const hasActiveFilters = selectedLevel || selectedDepartment || selectedCredits || searchQuery;
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  const toggleMobileFilters = () => {
+    setIsMobileFiltersOpen(!isMobileFiltersOpen);
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
@@ -126,28 +143,147 @@ const CourseFilters = ({
           </Button>
         )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <FilterSelect
-          title="Level"
-          options={levels}
-          value={selectedLevel}
-          onChange={onLevelChange}
+
+      {/* Search box */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <Input
+          placeholder="Search courses by title, code or description..."
+          className="pl-10"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
         />
-        <FilterSelect
-          title="Department"
-          options={departments}
-          value={selectedDepartment}
-          onChange={onDepartmentChange}
-        />
-        <FilterSelect
-          title="Credits"
-          options={credits}
-          value={selectedCredits}
-          onChange={onCreditsChange}
-        />
+        {searchQuery && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-2 h-6 w-6"
+            onClick={() => onSearchChange("")}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
+
+      {/* Desktop filters */}
+      <div className="hidden md:block">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FilterSelect
+            title="Level"
+            options={levels}
+            value={selectedLevel}
+            onChange={onLevelChange}
+          />
+          <FilterSelect
+            title="Department"
+            options={departments}
+            value={selectedDepartment}
+            onChange={onDepartmentChange}
+          />
+          <FilterSelect
+            title="Credits"
+            options={credits}
+            value={selectedCredits}
+            onChange={onCreditsChange}
+          />
+        </div>
+      </div>
+
+      {/* Mobile filters toggle */}
+      <div className="md:hidden">
+        <Button 
+          variant="outline" 
+          onClick={toggleMobileFilters}
+          className="w-full flex justify-between items-center"
+        >
+          <span className="flex items-center">
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            Filter Options
+          </span>
+          <ChevronsUpDown className="h-4 w-4" />
+        </Button>
+        
+        {isMobileFiltersOpen && (
+          <div className="mt-4 space-y-4">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="level">
+                <AccordionTrigger>Level</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    {levels.map((level) => (
+                      <div 
+                        key={level.value} 
+                        className="flex items-center"
+                        onClick={() => onLevelChange(level.value === selectedLevel ? "" : level.value)}
+                      >
+                        <div className={`w-4 h-4 mr-2 rounded-sm border ${level.value === selectedLevel ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center`}>
+                          {level.value === selectedLevel && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <span>{level.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="department">
+                <AccordionTrigger>Department</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    {departments.map((dept) => (
+                      <div 
+                        key={dept.value} 
+                        className="flex items-center"
+                        onClick={() => onDepartmentChange(dept.value === selectedDepartment ? "" : dept.value)}
+                      >
+                        <div className={`w-4 h-4 mr-2 rounded-sm border ${dept.value === selectedDepartment ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center`}>
+                          {dept.value === selectedDepartment && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <span>{dept.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="credits">
+                <AccordionTrigger>Credits</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    {credits.map((credit) => (
+                      <div 
+                        key={credit.value} 
+                        className="flex items-center"
+                        onClick={() => onCreditsChange(credit.value === selectedCredits ? "" : credit.value)}
+                      >
+                        <div className={`w-4 h-4 mr-2 rounded-sm border ${credit.value === selectedCredits ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center`}>
+                          {credit.value === selectedCredits && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <span>{credit.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        )}
+      </div>
+
+      {/* Active filters display */}
       {hasActiveFilters && (
         <div className="mt-4 flex gap-2 flex-wrap">
+          {searchQuery && (
+            <div className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full flex items-center">
+              Search: {searchQuery.length > 20 ? searchQuery.substring(0, 20) + '...' : searchQuery}
+              <button 
+                onClick={() => onSearchChange("")}
+                className="ml-2 hover:text-primary/80"
+              >
+                ×
+              </button>
+            </div>
+          )}
           {selectedLevel && (
             <div className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full flex items-center">
               Level: {levels.find(l => l.value === selectedLevel)?.label}

@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -30,7 +29,6 @@ import {
 import CourseFilters from "@/components/CourseFilters";
 import { toast } from "sonner";
 
-// Define course data structure
 type Course = {
   id: string;
   code: string;
@@ -43,7 +41,6 @@ type Course = {
   icon: React.ReactNode;
 };
 
-// Sample courses data
 const courses: Course[] = [
   {
     id: "cs101",
@@ -135,7 +132,6 @@ const courses: Course[] = [
   },
 ];
 
-// Course categories
 const categories = [
   { name: "Computer Science", count: courses.filter(c => c.department === "Computer Science").length },
   { name: "Information Systems", count: courses.filter(c => c.department === "Information Systems").length },
@@ -145,13 +141,11 @@ const categories = [
 ];
 
 const Courses = () => {
-  // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedCredits, setSelectedCredits] = useState("");
 
-  // Generate filter options
   const levelOptions = useMemo(() => {
     const levels = Array.from(new Set(courses.map(c => c.level)));
     return levels.map(level => ({ value: level, label: level }));
@@ -167,10 +161,8 @@ const Courses = () => {
     return credits.map(credit => ({ value: credit.toString(), label: `${credit} Credits` }));
   }, []);
 
-  // Filter courses based on selected filters and search query
   const filteredCourses = useMemo(() => {
     return courses.filter(course => {
-      // Apply search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = 
@@ -181,17 +173,14 @@ const Courses = () => {
         if (!matchesSearch) return false;
       }
       
-      // Apply level filter
       if (selectedLevel && course.level !== selectedLevel) {
         return false;
       }
       
-      // Apply department filter
       if (selectedDepartment && course.department !== selectedDepartment) {
         return false;
       }
       
-      // Apply credits filter
       if (selectedCredits && course.credits.toString() !== selectedCredits) {
         return false;
       }
@@ -229,7 +218,6 @@ const Courses = () => {
       
       <main className="container mx-auto px-4 py-16">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
           <div className="lg:w-1/4">
             <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
               <h2 className="text-xl font-bold mb-4">Course Categories</h2>
@@ -259,7 +247,6 @@ const Courses = () => {
             </div>
           </div>
           
-          {/* Main content */}
           <div className="lg:w-3/4">
             <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
               <h2 className="text-2xl font-bold mb-4">Course Listings</h2>
@@ -267,26 +254,12 @@ const Courses = () => {
                 Browse through our available courses. Click on any course for detailed information including syllabus, instructors, and registration details.
               </p>
               
-              {/* Search box */}
-              <div className="mt-4 relative">
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search courses by title, code or description..."
-                    className="pl-10"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-              
               <div className="flex items-center text-sm text-gray-500 mt-4">
                 <Clock size={16} className="mr-2" />
                 <span>Last updated: June 15, 2024</span>
               </div>
             </div>
             
-            {/* Course filters */}
             <CourseFilters
               levels={levelOptions}
               departments={departmentOptions}
@@ -294,20 +267,20 @@ const Courses = () => {
               selectedLevel={selectedLevel}
               selectedDepartment={selectedDepartment}
               selectedCredits={selectedCredits}
+              searchQuery={searchQuery}
               onLevelChange={setSelectedLevel}
               onDepartmentChange={setSelectedDepartment}
               onCreditsChange={setSelectedCredits}
+              onSearchChange={setSearchQuery}
               onClearFilters={clearFilters}
             />
             
-            {/* Results count */}
             <div className="mb-6 text-gray-700">
               Found <span className="font-medium">{filteredCourses.length}</span> courses
               {(selectedLevel || selectedDepartment || selectedCredits || searchQuery) && 
                 " matching your criteria"}
             </div>
             
-            {/* Course cards */}
             {filteredCourses.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 {filteredCourses.map((course) => (
