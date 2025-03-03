@@ -10,6 +10,9 @@ import Category from "./pages/Category";
 import About from "./pages/About";
 import Projects from "./pages/Projects";
 import Events from "./pages/Events";
+import Courses from "./pages/Courses";
+import Faculty from "./pages/Faculty";
+import Opportunities from "./pages/Opportunities";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +29,9 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/faculty" element={<Faculty />} />
+          <Route path="/opportunities" element={<Opportunities />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

@@ -32,6 +32,22 @@ const Navbar = () => {
               Home
             </Link>
             <Link 
+              to="/courses" 
+              className={`px-3 py-2 text-sm font-medium ${isActive('/courses') 
+                ? 'text-primary' 
+                : 'text-gray-700 hover:text-primary'}`}
+            >
+              Courses
+            </Link>
+            <Link 
+              to="/faculty" 
+              className={`px-3 py-2 text-sm font-medium ${isActive('/faculty') 
+                ? 'text-primary' 
+                : 'text-gray-700 hover:text-primary'}`}
+            >
+              Faculty
+            </Link>
+            <Link 
               to="/projects" 
               className={`px-3 py-2 text-sm font-medium ${isActive('/projects') 
                 ? 'text-primary' 
@@ -46,6 +62,14 @@ const Navbar = () => {
                 : 'text-gray-700 hover:text-primary'}`}
             >
               Events
+            </Link>
+            <Link 
+              to="/opportunities" 
+              className={`px-3 py-2 text-sm font-medium ${isActive('/opportunities') 
+                ? 'text-primary' 
+                : 'text-gray-700 hover:text-primary'}`}
+            >
+              Opportunities
             </Link>
             <Link 
               to="/category/research" 
@@ -93,6 +117,24 @@ const Navbar = () => {
               Home
             </Link>
             <Link
+              to="/courses"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/courses')
+                ? 'bg-primary/10 text-primary'
+                : 'text-gray-700 hover:bg-primary/5 hover:text-primary'}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Courses
+            </Link>
+            <Link
+              to="/faculty"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/faculty')
+                ? 'bg-primary/10 text-primary'
+                : 'text-gray-700 hover:bg-primary/5 hover:text-primary'}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Faculty
+            </Link>
+            <Link
               to="/projects"
               className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/projects')
                 ? 'bg-primary/10 text-primary'
@@ -109,6 +151,15 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
             >
               Events
+            </Link>
+            <Link
+              to="/opportunities"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/opportunities')
+                ? 'bg-primary/10 text-primary'
+                : 'text-gray-700 hover:bg-primary/5 hover:text-primary'}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Opportunities
             </Link>
             <Link
               to="/category/research"
