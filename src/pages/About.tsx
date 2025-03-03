@@ -1,7 +1,6 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Graduation, BookOpen, Calendar, Users, Award, FileText, Lightbulb } from "lucide-react";
+import { GraduationCap, BookOpen, Calendar, Users, Award, FileText, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -23,7 +22,7 @@ const About = () => {
         <div className="max-w-5xl mx-auto">
           <section className="mb-16">
             <h2 className="text-3xl font-bold mb-6 flex items-center">
-              <Graduation className="mr-3 text-primary" /> About Our College
+              <GraduationCap className="mr-3 text-primary" /> About Our College
             </h2>
             <p className="text-gray-700 mb-6 leading-relaxed">
               The College of Computers and Information was established to advance education and research in computer science and information technology. We are committed to developing skilled professionals who can meet the challenges of the rapidly evolving digital landscape.

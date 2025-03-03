@@ -8,6 +8,8 @@ import Index from "./pages/Index";
 import BlogPost from "./pages/BlogPost";
 import Category from "./pages/Category";
 import About from "./pages/About";
+import Projects from "./pages/Projects";
+import Events from "./pages/Events";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/category/:categoryId" element={<Category />} />
           <Route path="/about" element={<About />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/events" element={<Events />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

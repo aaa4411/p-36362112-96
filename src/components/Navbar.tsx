@@ -18,7 +18,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold text-primary">The Journal</span>
+              <span className="text-xl font-bold text-primary">College of Computing</span>
             </Link>
           </div>
           
@@ -32,12 +32,20 @@ const Navbar = () => {
               Home
             </Link>
             <Link 
-              to="/category/design" 
-              className={`px-3 py-2 text-sm font-medium ${isActive('/category/design') 
+              to="/projects" 
+              className={`px-3 py-2 text-sm font-medium ${isActive('/projects') 
                 ? 'text-primary' 
                 : 'text-gray-700 hover:text-primary'}`}
             >
-              Design
+              Projects
+            </Link>
+            <Link 
+              to="/events" 
+              className={`px-3 py-2 text-sm font-medium ${isActive('/events') 
+                ? 'text-primary' 
+                : 'text-gray-700 hover:text-primary'}`}
+            >
+              Events
             </Link>
             <Link 
               to="/category/research" 
@@ -46,14 +54,6 @@ const Navbar = () => {
                 : 'text-gray-700 hover:text-primary'}`}
             >
               Research
-            </Link>
-            <Link 
-              to="/category/technology" 
-              className={`px-3 py-2 text-sm font-medium ${isActive('/category/technology')
-                ? 'text-primary' 
-                : 'text-gray-700 hover:text-primary'}`}
-            >
-              Technology
             </Link>
             <Link 
               to="/about" 
@@ -93,13 +93,22 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              to="/category/design"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/category/design')
+              to="/projects"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/projects')
                 ? 'bg-primary/10 text-primary'
                 : 'text-gray-700 hover:bg-primary/5 hover:text-primary'}`}
               onClick={() => setIsOpen(false)}
             >
-              Design
+              Projects
+            </Link>
+            <Link
+              to="/events"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/events')
+                ? 'bg-primary/10 text-primary'
+                : 'text-gray-700 hover:bg-primary/5 hover:text-primary'}`}
+              onClick={() => setIsOpen(false)}
+            >
+              Events
             </Link>
             <Link
               to="/category/research"
@@ -109,15 +118,6 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
             >
               Research
-            </Link>
-            <Link
-              to="/category/technology"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/category/technology')
-                ? 'bg-primary/10 text-primary'
-                : 'text-gray-700 hover:bg-primary/5 hover:text-primary'}`}
-              onClick={() => setIsOpen(false)}
-            >
-              Technology
             </Link>
             <Link
               to="/about"
