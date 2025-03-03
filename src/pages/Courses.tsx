@@ -1,4 +1,5 @@
 
+import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
@@ -13,9 +14,11 @@ import {
   ArrowRight,
   Clock,
   Users,
-  Layers
+  Layers,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { 
   Card,
   CardContent,
@@ -24,6 +27,8 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import CourseFilters from "@/components/CourseFilters";
+import { toast } from "sonner";
 
 // Define course data structure
 type Course = {
@@ -140,6 +145,75 @@ const categories = [
 ];
 
 const Courses = () => {
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedCredits, setSelectedCredits] = useState("");
+
+  // Generate filter options
+  const levelOptions = useMemo(() => {
+    const levels = Array.from(new Set(courses.map(c => c.level)));
+    return levels.map(level => ({ value: level, label: level }));
+  }, []);
+
+  const departmentOptions = useMemo(() => {
+    const departments = Array.from(new Set(courses.map(c => c.department)));
+    return departments.map(dept => ({ value: dept, label: dept }));
+  }, []);
+
+  const creditOptions = useMemo(() => {
+    const credits = Array.from(new Set(courses.map(c => c.credits)));
+    return credits.map(credit => ({ value: credit.toString(), label: `${credit} Credits` }));
+  }, []);
+
+  // Filter courses based on selected filters and search query
+  const filteredCourses = useMemo(() => {
+    return courses.filter(course => {
+      // Apply search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          course.title.toLowerCase().includes(query) ||
+          course.code.toLowerCase().includes(query) ||
+          course.description.toLowerCase().includes(query);
+        
+        if (!matchesSearch) return false;
+      }
+      
+      // Apply level filter
+      if (selectedLevel && course.level !== selectedLevel) {
+        return false;
+      }
+      
+      // Apply department filter
+      if (selectedDepartment && course.department !== selectedDepartment) {
+        return false;
+      }
+      
+      // Apply credits filter
+      if (selectedCredits && course.credits.toString() !== selectedCredits) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [courses, searchQuery, selectedLevel, selectedDepartment, selectedCredits]);
+
+  const clearFilters = () => {
+    setSelectedLevel("");
+    setSelectedDepartment("");
+    setSelectedCredits("");
+    setSearchQuery("");
+    toast("All filters have been cleared");
+  };
+
+  const handleViewCourseDetails = (courseId: string) => {
+    toast(`Viewing details for course ${courseId}`, {
+      description: "Feature coming soon",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -192,55 +266,105 @@ const Courses = () => {
               <p className="text-gray-700 mb-2">
                 Browse through our available courses. Click on any course for detailed information including syllabus, instructors, and registration details.
               </p>
+              
+              {/* Search box */}
+              <div className="mt-4 relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search courses by title, code or description..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              
               <div className="flex items-center text-sm text-gray-500 mt-4">
                 <Clock size={16} className="mr-2" />
                 <span>Last updated: June 15, 2024</span>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {courses.map((course) => (
-                <Card key={course.id} className="overflow-hidden">
-                  <CardHeader className="pb-4">
-                    <div className="flex justify-between items-start">
-                      <div className="bg-primary/10 rounded-lg p-2">{course.icon}</div>
-                      <div className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                        {course.level}
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <div className="text-sm font-medium text-gray-500">{course.code}</div>
-                      <CardTitle className="mt-1">{course.title}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{course.description}</CardDescription>
-                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="font-medium text-gray-500">Department</div>
-                        <div>{course.department}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-500">Credits</div>
-                        <div>{course.credits}</div>
-                      </div>
-                    </div>
-                    {course.prerequisites.length > 0 && (
-                      <div className="mt-4 text-sm">
-                        <div className="font-medium text-gray-500">Prerequisites</div>
-                        <div>{course.prerequisites.join(", ")}</div>
-                      </div>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" size="sm" className="w-full flex items-center justify-center">
-                      <span>View Course Details</span>
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+            {/* Course filters */}
+            <CourseFilters
+              levels={levelOptions}
+              departments={departmentOptions}
+              credits={creditOptions}
+              selectedLevel={selectedLevel}
+              selectedDepartment={selectedDepartment}
+              selectedCredits={selectedCredits}
+              onLevelChange={setSelectedLevel}
+              onDepartmentChange={setSelectedDepartment}
+              onCreditsChange={setSelectedCredits}
+              onClearFilters={clearFilters}
+            />
+            
+            {/* Results count */}
+            <div className="mb-6 text-gray-700">
+              Found <span className="font-medium">{filteredCourses.length}</span> courses
+              {(selectedLevel || selectedDepartment || selectedCredits || searchQuery) && 
+                " matching your criteria"}
             </div>
+            
+            {/* Course cards */}
+            {filteredCourses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {filteredCourses.map((course) => (
+                  <Card key={course.id} className="overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <div className="flex justify-between items-start">
+                        <div className="bg-primary/10 rounded-lg p-2">{course.icon}</div>
+                        <div className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                          {course.level}
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="text-sm font-medium text-gray-500">{course.code}</div>
+                        <CardTitle className="mt-1">{course.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription>{course.description}</CardDescription>
+                      <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <div className="font-medium text-gray-500">Department</div>
+                          <div>{course.department}</div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-500">Credits</div>
+                          <div>{course.credits}</div>
+                        </div>
+                      </div>
+                      {course.prerequisites.length > 0 && (
+                        <div className="mt-4 text-sm">
+                          <div className="font-medium text-gray-500">Prerequisites</div>
+                          <div>{course.prerequisites.join(", ")}</div>
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full flex items-center justify-center"
+                        onClick={() => handleViewCourseDetails(course.id)}
+                      >
+                        <span>View Course Details</span>
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-gray-100 rounded-lg p-8 text-center mb-8">
+                <div className="text-gray-500 mb-2">No courses match your filters</div>
+                <Button onClick={clearFilters} variant="outline" size="sm">
+                  Clear Filters
+                </Button>
+              </div>
+            )}
             
             <div className="bg-primary/5 p-6 rounded-lg">
               <h3 className="text-lg font-semibold mb-2">Registration Information</h3>
