@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
@@ -220,7 +219,8 @@ const Opportunities = () => {
         toast({
           title: "Application submitted!",
           description: `Your application for "${selectedOpportunity.title}" has been sent.`,
-          variant: "success",
+          // Change from "success" to "default" since "success" is not a valid variant
+          variant: "default",
         });
       }
     }, 1500);
