@@ -14,7 +14,12 @@ import {
   Clock,
   Users,
   Layers,
-  Search
+  Search,
+  BarChart,
+  PlusCircle,
+  Check,
+  X,
+  ScaleIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +33,7 @@ import {
 } from "@/components/ui/card";
 import CourseFilters from "@/components/CourseFilters";
 import { toast } from "sonner";
+import CourseComparison from "@/components/CourseComparison";
 
 type Course = {
   id: string;
@@ -145,6 +151,8 @@ const Courses = () => {
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedCredits, setSelectedCredits] = useState("");
+  const [coursesToCompare, setCoursesToCompare] = useState<Course[]>([]);
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false);
 
   const levelOptions = useMemo(() => {
     const levels = Array.from(new Set(courses.map(c => c.level)));
@@ -203,6 +211,41 @@ const Courses = () => {
     });
   };
 
+  const toggleCourseComparison = (course: Course) => {
+    if (coursesToCompare.some(c => c.id === course.id)) {
+      setCoursesToCompare(coursesToCompare.filter(c => c.id !== course.id));
+      toast(`Removed ${course.title} from comparison`);
+    } else {
+      if (coursesToCompare.length >= 3) {
+        toast("You can compare up to 3 courses at a time", {
+          description: "Please remove a course before adding another."
+        });
+        return;
+      }
+      setCoursesToCompare([...coursesToCompare, course]);
+      toast(`Added ${course.title} to comparison`);
+    }
+  };
+
+  const openComparison = () => {
+    if (coursesToCompare.length < 2) {
+      toast("Please select at least 2 courses to compare", {
+        description: "You can select up to 3 courses."
+      });
+      return;
+    }
+    setIsComparisonOpen(true);
+  };
+
+  const closeComparison = () => {
+    setIsComparisonOpen(false);
+  };
+
+  const clearComparison = () => {
+    setCoursesToCompare([]);
+    toast("Comparison cleared");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -217,6 +260,40 @@ const Courses = () => {
       </div>
       
       <main className="container mx-auto px-4 py-16">
+        {coursesToCompare.length > 0 && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t z-30 p-4 animate-slide-in-bottom">
+            <div className="container mx-auto flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <ScaleIcon className="h-5 w-5 text-primary" />
+                <span className="font-medium">Comparing {coursesToCompare.length} courses</span>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearComparison}
+                >
+                  Clear
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={openComparison}
+                  disabled={coursesToCompare.length < 2}
+                >
+                  Compare Courses
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isComparisonOpen && (
+          <CourseComparison 
+            courses={coursesToCompare} 
+            onClose={closeComparison}
+          />
+        )}
+        
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-1/4">
             <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
@@ -288,8 +365,23 @@ const Courses = () => {
                     <CardHeader className="pb-4">
                       <div className="flex justify-between items-start">
                         <div className="bg-primary/10 rounded-lg p-2">{course.icon}</div>
-                        <div className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                          {course.level}
+                        <div className="flex gap-2">
+                          <div className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                            {course.level}
+                          </div>
+                          <button 
+                            onClick={() => toggleCourseComparison(course)}
+                            className={`p-1 rounded-full ${coursesToCompare.some(c => c.id === course.id) 
+                              ? 'bg-primary/10 text-primary' 
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            aria-label={coursesToCompare.some(c => c.id === course.id) 
+                              ? `Remove ${course.title} from comparison` 
+                              : `Add ${course.title} to comparison`}
+                          >
+                            {coursesToCompare.some(c => c.id === course.id) 
+                              ? <Check className="h-4 w-4" /> 
+                              : <PlusCircle className="h-4 w-4" />}
+                          </button>
                         </div>
                       </div>
                       <div className="mt-4">
