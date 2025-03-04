@@ -58,7 +58,7 @@ const CourseComparison = ({ courses, onClose }: CourseComparisonProps) => {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="py-4 px-2 text-left w-1/4 font-medium text-gray-500">
+                <th className="py-4 px-2 text-left w-1/4 font-medium text-gray-500 sticky left-0 bg-background z-10">
                   Feature
                 </th>
                 {courses.map((course) => (
@@ -82,7 +82,7 @@ const CourseComparison = ({ courses, onClose }: CourseComparisonProps) => {
                   key={attribute.name} 
                   className="border-t border-gray-200 hover:bg-gray-50"
                 >
-                  <td className="py-4 px-2 font-medium">{attribute.name}</td>
+                  <td className="py-4 px-2 font-medium sticky left-0 bg-background z-10">{attribute.name}</td>
                   {courses.map((course) => (
                     <td 
                       key={course.id}
@@ -94,7 +94,7 @@ const CourseComparison = ({ courses, onClose }: CourseComparisonProps) => {
                 </tr>
               ))}
               <tr className="border-t border-gray-200 hover:bg-gray-50">
-                <td className="py-4 px-2 font-medium">Description</td>
+                <td className="py-4 px-2 font-medium sticky left-0 bg-background z-10">Description</td>
                 {courses.map((course) => (
                   <td 
                     key={course.id}
@@ -108,8 +108,8 @@ const CourseComparison = ({ courses, onClose }: CourseComparisonProps) => {
           </table>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Close Comparison
           </Button>
         </DialogFooter>

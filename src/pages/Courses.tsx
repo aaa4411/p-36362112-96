@@ -34,6 +34,8 @@ import {
 import CourseFilters from "@/components/CourseFilters";
 import { toast } from "sonner";
 import CourseComparison from "@/components/CourseComparison";
+import CourseDistributionChart from "@/components/CourseDistributionChart";
+import { generateChartColors } from "@/lib/utils";
 
 type Course = {
   id: string;
@@ -246,32 +248,52 @@ const Courses = () => {
     toast("Comparison cleared");
   };
 
+  const chartData = useMemo(() => {
+    const departments = Array.from(new Set(courses.map(c => c.department)));
+    
+    const data = departments.map(dept => {
+      const count = courses.filter(c => c.department === dept).length;
+      return {
+        name: dept,
+        value: count
+      };
+    });
+    
+    const colors = generateChartColors(departments.length);
+    
+    return data.map((item, index) => ({
+      ...item,
+      color: colors[index]
+    }));
+  }, [courses]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="bg-primary text-white py-16">
+      <div className="bg-primary text-white py-8 md:py-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Course Catalog</h1>
-          <p className="text-xl max-w-3xl">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">Course Catalog</h1>
+          <p className="text-lg md:text-xl max-w-3xl">
             Explore our comprehensive range of computing and information technology courses designed to prepare you for success in the digital world.
           </p>
         </div>
       </div>
       
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-8 md:py-16">
         {coursesToCompare.length > 0 && (
           <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t z-30 p-4 animate-slide-in-bottom">
-            <div className="container mx-auto flex justify-between items-center">
+            <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
               <div className="flex items-center gap-2">
                 <ScaleIcon className="h-5 w-5 text-primary" />
                 <span className="font-medium">Comparing {coursesToCompare.length} courses</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={clearComparison}
+                  className="flex-1 sm:flex-initial"
                 >
                   Clear
                 </Button>
@@ -279,6 +301,7 @@ const Courses = () => {
                   size="sm" 
                   onClick={openComparison}
                   disabled={coursesToCompare.length < 2}
+                  className="flex-1 sm:flex-initial"
                 >
                   Compare Courses
                 </Button>
@@ -295,8 +318,8 @@ const Courses = () => {
         )}
         
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-1/4">
-            <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+          <div className="lg:w-1/4 space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
               <h2 className="text-xl font-bold mb-4">Course Categories</h2>
               <ul className="space-y-2">
                 {categories.map((category) => (
@@ -314,6 +337,8 @@ const Courses = () => {
                 ))}
               </ul>
             </div>
+            
+            <CourseDistributionChart data={chartData} />
             
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <h2 className="text-xl font-bold mb-4">Need Help?</h2>
