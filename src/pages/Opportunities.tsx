@@ -1,4 +1,5 @@
-
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
@@ -12,7 +13,14 @@ import {
   BookOpen,
   Award,
   Users,
-  Check
+  Check,
+  Filter,
+  Search,
+  X,
+  Heart,
+  Share,
+  Download,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -23,8 +31,23 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
-// Define opportunity data structure
 type Opportunity = {
   id: string;
   title: string;
@@ -36,10 +59,11 @@ type Opportunity = {
   requirements: string[];
   link: string;
   featured?: boolean;
+  saved?: boolean;
+  applicationStatus?: "not_applied" | "in_progress" | "applied" | "interview" | "rejected" | "accepted";
 };
 
-// Sample opportunities data
-const opportunities: Opportunity[] = [
+const opportunitiesData: Opportunity[] = [
   {
     id: "int-001",
     title: "Software Development Intern",
@@ -133,6 +157,132 @@ const opportunities: Opportunity[] = [
 ];
 
 const Opportunities = () => {
+  const { toast } = useToast();
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(opportunitiesData);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
+  const [isApplicationDialogOpen, setIsApplicationDialogOpen] = useState(false);
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+  
+  const filterOpportunities = () => {
+    let filtered = [...opportunitiesData];
+    
+    if (searchQuery) {
+      filtered = filtered.filter(
+        opp => 
+          opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          opp.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          opp.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    if (filterType) {
+      filtered = filtered.filter(opp => opp.type === filterType);
+    }
+    
+    return filtered;
+  };
+  
+  const filteredOpportunities = filterOpportunities();
+  
+  const handleFilterClick = (type: string) => {
+    if (filterType === type) {
+      setFilterType(null);
+      setActiveFilters(activeFilters.filter(filter => filter !== type));
+    } else {
+      setFilterType(type);
+      if (!activeFilters.includes(type)) {
+        setActiveFilters([...activeFilters, type]);
+      }
+    }
+  };
+  
+  const handleClearFilters = () => {
+    setFilterType(null);
+    setSearchQuery("");
+    setActiveFilters([]);
+  };
+  
+  const handleSaveOpportunity = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setOpportunities(prev => 
+      prev.map(opp => 
+        opp.id === id ? { ...opp, saved: !opp.saved } : opp
+      )
+    );
+    
+    const opportunity = opportunities.find(opp => opp.id === id);
+    if (opportunity) {
+      toast({
+        title: opportunity.saved ? "Removed from saved" : "Saved to favorites",
+        description: opportunity.saved ? "Opportunity removed from your saved list" : "Opportunity added to your saved list",
+        variant: opportunity.saved ? "destructive" : "default",
+      });
+    }
+  };
+  
+  const handleShareOpportunity = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const opportunity = opportunities.find(opp => opp.id === id);
+    if (opportunity) {
+      toast({
+        title: "Link copied to clipboard",
+        description: `Share link for "${opportunity.title}" has been copied`,
+      });
+    }
+  };
+  
+  const handleApplyNow = (opportunity: Opportunity) => {
+    setSelectedOpportunity(opportunity);
+    setIsApplicationDialogOpen(true);
+  };
+  
+  const handleSubmitApplication = () => {
+    setIsApplying(true);
+    
+    setTimeout(() => {
+      setIsApplying(false);
+      setIsApplicationDialogOpen(false);
+      
+      if (selectedOpportunity) {
+        setOpportunities(prev => 
+          prev.map(opp => 
+            opp.id === selectedOpportunity.id ? { ...opp, applicationStatus: "applied" } : opp
+          )
+        );
+        
+        toast({
+          title: "Application submitted!",
+          description: `Your application for "${selectedOpportunity.title}" has been sent.`,
+          variant: "success",
+        });
+      }
+    }, 1500);
+  };
+  
+  const handleDownloadDetails = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const opportunity = opportunities.find(opp => opp.id === id);
+    if (opportunity) {
+      toast({
+        title: "Downloading opportunity details",
+        description: `Details for "${opportunity.title}" are being prepared for download.`,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -143,18 +293,76 @@ const Opportunities = () => {
           <p className="text-xl max-w-3xl">
             Discover internships, research positions, scholarships, and job opportunities that will help you gain valuable experience and advance your career in technology.
           </p>
+          
+          <div className="mt-8 flex flex-col md:flex-row gap-4">
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                type="text"
+                placeholder="Search for opportunities..."
+                value={searchQuery}
+                onChange={handleSearch}
+                className="pl-10 bg-white text-black rounded-lg w-full"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant={filterType === "internship" ? "secondary" : "outline"} 
+                onClick={() => handleFilterClick("internship")}
+                className="bg-white text-primary hover:bg-gray-100"
+              >
+                <Briefcase size={16} className="mr-2" /> Internships
+              </Button>
+              <Button 
+                variant={filterType === "research" ? "secondary" : "outline"} 
+                onClick={() => handleFilterClick("research")}
+                className="bg-white text-primary hover:bg-gray-100"
+              >
+                <BookOpen size={16} className="mr-2" /> Research
+              </Button>
+              <Button 
+                variant={filterType === "scholarship" ? "secondary" : "outline"} 
+                onClick={() => handleFilterClick("scholarship")}
+                className="bg-white text-primary hover:bg-gray-100"
+              >
+                <Award size={16} className="mr-2" /> Scholarships
+              </Button>
+            </div>
+          </div>
+          
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {activeFilters.map(filter => (
+                <Badge key={filter} variant="secondary" className="px-3 py-1 bg-white/20">
+                  {filter}
+                  <button 
+                    onClick={() => handleFilterClick(filter)}
+                    className="ml-2 rounded-full hover:bg-white/20 p-1"
+                  >
+                    <X size={12} />
+                  </button>
+                </Badge>
+              ))}
+              <Button 
+                variant="link" 
+                onClick={handleClearFilters} 
+                className="text-white/80 hover:text-white p-0 h-auto"
+              >
+                Clear all filters
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       
       <main className="container mx-auto px-4 py-16">
-        {/* Featured Opportunities */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8">Featured Opportunities</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {opportunities
+            {filteredOpportunities
               .filter(opportunity => opportunity.featured)
               .map(opportunity => (
-                <Card key={opportunity.id} className="border-2 border-primary/40">
+                <Card key={opportunity.id} className="border-2 border-primary/40 hover:shadow-lg transition-shadow group">
                   <CardHeader className="pb-2">
                     <div className="mb-2">
                       {opportunity.type === 'internship' && (
@@ -178,7 +386,46 @@ const Opportunities = () => {
                         </span>
                       )}
                     </div>
-                    <CardTitle>{opportunity.title}</CardTitle>
+                    <div className="flex justify-between items-start">
+                      <CardTitle>{opportunity.title}</CardTitle>
+                      <div className="flex space-x-1">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={(e) => handleSaveOpportunity(opportunity.id, e)}
+                              >
+                                <Heart className={`h-4 w-4 ${opportunity.saved ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{opportunity.saved ? 'Remove from favorites' : 'Save to favorites'}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={(e) => handleShareOpportunity(opportunity.id, e)}
+                              >
+                                <Share className="h-4 w-4 text-gray-500" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Share opportunity</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
                     <div className="text-sm text-gray-500 flex items-center mt-1">
                       <span className="mr-3">{opportunity.organization}</span>
                       <span className="flex items-center">
@@ -205,10 +452,22 @@ const Opportunities = () => {
                       Application Deadline: {opportunity.deadline}
                     </div>
                   </CardContent>
-                  <CardFooter>
-                    <Button className="w-full flex items-center justify-center">
+                  <CardFooter className="flex justify-between items-center">
+                    <Button
+                      variant="outline" 
+                      size="sm"
+                      onClick={(e) => handleDownloadDetails(opportunity.id, e)}
+                      className="text-gray-600"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Details
+                    </Button>
+                    <Button 
+                      onClick={() => handleApplyNow(opportunity)}
+                      className="w-2/3 flex items-center justify-center group-hover:bg-primary/90 transition-colors"
+                    >
                       <span>Apply Now</span>
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Button>
                   </CardFooter>
                 </Card>
@@ -216,13 +475,12 @@ const Opportunities = () => {
           </div>
         </section>
         
-        {/* Opportunity Categories */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8">Browse by Category</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-md transition-shadow group hover:border-primary/50">
               <CardHeader>
-                <div className="mx-auto bg-blue-100 p-3 rounded-full w-16 h-16 flex items-center justify-center">
+                <div className="mx-auto bg-blue-100 p-3 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                   <Briefcase className="h-8 w-8 text-blue-600" />
                 </div>
                 <CardTitle className="mt-4">Internships</CardTitle>
@@ -233,15 +491,20 @@ const Opportunities = () => {
                 </p>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Button variant="outline">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleFilterClick("internship")}
+                  className="group-hover:border-blue-600 group-hover:text-blue-600 transition-colors"
+                >
                   View All Internships
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-md transition-shadow group hover:border-primary/50">
               <CardHeader>
-                <div className="mx-auto bg-purple-100 p-3 rounded-full w-16 h-16 flex items-center justify-center">
+                <div className="mx-auto bg-purple-100 p-3 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
                   <BookOpen className="h-8 w-8 text-purple-600" />
                 </div>
                 <CardTitle className="mt-4">Research</CardTitle>
@@ -252,15 +515,20 @@ const Opportunities = () => {
                 </p>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => handleFilterClick("research")}
+                  className="group-hover:border-purple-600 group-hover:text-purple-600 transition-colors"
+                >
                   View Research Opportunities
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-md transition-shadow group hover:border-primary/50">
               <CardHeader>
-                <div className="mx-auto bg-green-100 p-3 rounded-full w-16 h-16 flex items-center justify-center">
+                <div className="mx-auto bg-green-100 p-3 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-green-200 transition-colors">
                   <Users className="h-8 w-8 text-green-600" />
                 </div>
                 <CardTitle className="mt-4">Campus Jobs</CardTitle>
@@ -271,15 +539,20 @@ const Opportunities = () => {
                 </p>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => handleFilterClick("job")}
+                  className="group-hover:border-green-600 group-hover:text-green-600 transition-colors"
+                >
                   View Campus Jobs
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </CardFooter>
             </Card>
             
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-md transition-shadow group hover:border-primary/50">
               <CardHeader>
-                <div className="mx-auto bg-amber-100 p-3 rounded-full w-16 h-16 flex items-center justify-center">
+                <div className="mx-auto bg-amber-100 p-3 rounded-full w-16 h-16 flex items-center justify-center group-hover:bg-amber-200 transition-colors">
                   <Award className="h-8 w-8 text-amber-600" />
                 </div>
                 <CardTitle className="mt-4">Scholarships</CardTitle>
@@ -290,15 +563,19 @@ const Opportunities = () => {
                 </p>
               </CardContent>
               <CardFooter className="flex justify-center">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => handleFilterClick("scholarship")}
+                  className="group-hover:border-amber-600 group-hover:text-amber-600 transition-colors"
+                >
                   View Scholarships
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </CardFooter>
             </Card>
           </div>
         </section>
         
-        {/* All Opportunities */}
         <section className="mb-16">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold">All Opportunities</h2>
@@ -313,74 +590,159 @@ const Opportunities = () => {
             </div>
           </div>
           
-          <div className="space-y-6">
-            {opportunities.map(opportunity => (
-              <Card key={opportunity.id} className="overflow-hidden hover:border-primary/50 transition-colors">
-                <div className="flex flex-col md:flex-row">
-                  <div className="md:w-3/4 p-6">
-                    <div className="mb-2">
-                      {opportunity.type === 'internship' && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          <Briefcase className="mr-1 h-3 w-3" /> Internship
-                        </span>
-                      )}
-                      {opportunity.type === 'research' && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          <BookOpen className="mr-1 h-3 w-3" /> Research
-                        </span>
-                      )}
-                      {opportunity.type === 'job' && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <Briefcase className="mr-1 h-3 w-3" /> Job
-                        </span>
-                      )}
-                      {opportunity.type === 'scholarship' && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                          <Award className="mr-1 h-3 w-3" /> Scholarship
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xl font-semibold mb-1">{opportunity.title}</h3>
-                    <div className="text-sm text-gray-500 flex items-center mb-4">
-                      <span className="mr-3">{opportunity.organization}</span>
-                      <span className="flex items-center">
-                        <Globe className="mr-1 h-3 w-3" />
-                        {opportunity.location}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 text-sm">{opportunity.description}</p>
-                  </div>
-                  
-                  <div className="md:w-1/4 bg-gray-50 p-6 flex flex-col justify-between">
-                    <div>
-                      <div className="text-sm text-red-600 mb-4 flex items-center">
-                        <Calendar className="mr-2 h-4 w-4" /> 
-                        <span>Deadline: {opportunity.deadline}</span>
+          {filteredOpportunities.length === 0 ? (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <AlertCircle className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-700 mb-2">No opportunities found</h3>
+              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                We couldn't find any opportunities matching your search criteria. Try adjusting your filters or search term.
+              </p>
+              <Button onClick={handleClearFilters}>Clear All Filters</Button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {filteredOpportunities.map(opportunity => (
+                <Card key={opportunity.id} className="overflow-hidden hover:shadow-md transition-shadow group hover:border-primary/50">
+                  <div className="flex flex-col md:flex-row">
+                    <div className="md:w-3/4 p-6">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="mb-2">
+                            {opportunity.type === 'internship' && (
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <Briefcase className="mr-1 h-3 w-3" /> Internship
+                              </span>
+                            )}
+                            {opportunity.type === 'research' && (
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                <BookOpen className="mr-1 h-3 w-3" /> Research
+                              </span>
+                            )}
+                            {opportunity.type === 'job' && (
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <Briefcase className="mr-1 h-3 w-3" /> Job
+                              </span>
+                            )}
+                            {opportunity.type === 'scholarship' && (
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                <Award className="mr-1 h-3 w-3" /> Scholarship
+                              </span>
+                            )}
+                            {opportunity.applicationStatus === 'applied' && (
+                              <span className="ml-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-800">
+                                <Check className="mr-1 h-3 w-3" /> Applied
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-semibold mb-1">{opportunity.title}</h3>
+                        </div>
+                        <div className="flex space-x-1">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8"
+                                  onClick={(e) => handleSaveOpportunity(opportunity.id, e)}
+                                >
+                                  <Heart className={`h-4 w-4 ${opportunity.saved ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{opportunity.saved ? 'Remove from favorites' : 'Save to favorites'}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8"
+                                  onClick={(e) => handleShareOpportunity(opportunity.id, e)}
+                                >
+                                  <Share className="h-4 w-4 text-gray-500" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Share opportunity</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       </div>
-                      <ul className="text-xs text-gray-600 mb-6">
-                        {opportunity.requirements.slice(0, 2).map((req, index) => (
-                          <li key={index} className="flex items-start mb-1">
-                            <Check className="h-3 w-3 text-gray-500 mr-1 mt-0.5 flex-shrink-0" />
-                            <span>{req}</span>
-                          </li>
-                        ))}
-                        {opportunity.requirements.length > 2 && (
-                          <li className="text-xs text-gray-500 ml-4">
-                            +{opportunity.requirements.length - 2} more requirements
-                          </li>
-                        )}
-                      </ul>
+                      <div className="text-sm text-gray-500 flex items-center mb-4">
+                        <span className="mr-3">{opportunity.organization}</span>
+                        <span className="flex items-center">
+                          <Globe className="mr-1 h-3 w-3" />
+                          {opportunity.location}
+                        </span>
+                      </div>
+                      <p className="text-gray-700 text-sm">{opportunity.description}</p>
                     </div>
                     
-                    <Button size="sm" variant="outline" className="w-full flex items-center justify-center">
-                      <span>View Details</span>
-                      <ArrowRight className="ml-2 h-3 w-3" />
-                    </Button>
+                    <div className="md:w-1/4 bg-gray-50 p-6 flex flex-col justify-between">
+                      <div>
+                        <div className="text-sm text-red-600 mb-4 flex items-center">
+                          <Calendar className="mr-2 h-4 w-4" /> 
+                          <span>Deadline: {opportunity.deadline}</span>
+                        </div>
+                        <ul className="text-xs text-gray-600 mb-6">
+                          {opportunity.requirements.slice(0, 2).map((req, index) => (
+                            <li key={index} className="flex items-start mb-1">
+                              <Check className="h-3 w-3 text-gray-500 mr-1 mt-0.5 flex-shrink-0" />
+                              <span>{req}</span>
+                            </li>
+                          ))}
+                          {opportunity.requirements.length > 2 && (
+                            <li className="text-xs text-gray-500 ml-4">
+                              +{opportunity.requirements.length - 2} more requirements
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="w-full flex items-center justify-center"
+                          onClick={(e) => handleDownloadDetails(opportunity.id, e)}
+                        >
+                          <Download className="mr-2 h-3 w-3" />
+                          <span>Download Details</span>
+                        </Button>
+                        
+                        <Button 
+                          size="sm" 
+                          className="w-full flex items-center justify-center"
+                          onClick={() => handleApplyNow(opportunity)}
+                          disabled={opportunity.applicationStatus === 'applied'}
+                        >
+                          {opportunity.applicationStatus === 'applied' ? (
+                            <>
+                              <Check className="mr-2 h-3 w-3" />
+                              <span>Applied</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Apply Now</span>
+                              <ArrowRight className="ml-2 h-3 w-3" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
           
           <div className="mt-8 flex justify-center">
             <Button variant="outline" className="mr-2">
@@ -395,7 +757,6 @@ const Opportunities = () => {
           </div>
         </section>
         
-        {/* Success Stories */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8">Student Success Stories</h2>
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -438,7 +799,6 @@ const Opportunities = () => {
           </div>
         </section>
         
-        {/* Call to Action */}
         <section>
           <div className="bg-primary rounded-lg p-8 text-white">
             <div className="max-w-3xl mx-auto text-center">
@@ -457,6 +817,51 @@ const Opportunities = () => {
           </div>
         </section>
       </main>
+      
+      <Dialog open={isApplicationDialogOpen} onOpenChange={setIsApplicationDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Apply for {selectedOpportunity?.title}</DialogTitle>
+            <DialogDescription>
+              Complete this form to submit your application for this opportunity.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="resume" className="text-right text-sm font-medium col-span-1">
+                Resume
+              </label>
+              <Input id="resume" type="file" className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="coverLetter" className="text-right text-sm font-medium col-span-1">
+                Cover Letter
+              </label>
+              <Input id="coverLetter" type="file" className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="email" className="text-right text-sm font-medium col-span-1">
+                Email
+              </label>
+              <Input id="email" type="email" placeholder="your.email@example.com" className="col-span-3" />
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setIsApplicationDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitApplication}
+              isLoading={isApplying}
+            >
+              {isApplying ? "Submitting..." : "Submit Application"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
