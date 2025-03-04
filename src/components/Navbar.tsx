@@ -1,15 +1,30 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import AuthDialog from "@/components/Auth/AuthDialog";
+import UserMenu from "@/components/Auth/UserMenu";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const openLoginDialog = () => {
+    setAuthMode("login");
+    setAuthDialogOpen(true);
+  };
+
+  const openSignupDialog = () => {
+    setAuthMode("signup");
+    setAuthDialogOpen(true);
   };
 
   return (
@@ -87,10 +102,36 @@ const Navbar = () => {
             >
               About
             </Link>
+
+            <div className="ml-4 flex items-center space-x-2">
+              {isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={openLoginDialog}>
+                    Sign In
+                  </Button>
+                  <Button onClick={openSignupDialog}>
+                    Sign Up
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
           
           {/* Mobile menu button */}
           <div className="flex items-center sm:hidden">
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={openLoginDialog}
+                className="mr-2"
+              >
+                Sign In
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -179,9 +220,23 @@ const Navbar = () => {
             >
               About
             </Link>
+            {!isAuthenticated && (
+              <Button
+                onClick={openSignupDialog}
+                className="w-full mt-2"
+              >
+                Sign Up
+              </Button>
+            )}
           </div>
         </div>
       )}
+
+      <AuthDialog
+        isOpen={authDialogOpen}
+        onClose={() => setAuthDialogOpen(false)}
+        initialMode={authMode}
+      />
     </nav>
   );
 };
