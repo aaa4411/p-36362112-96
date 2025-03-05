@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Check, ChevronsUpDown, Filter, Search, SlidersHorizontal, X } from "lucide-react";
+import { Check, ChevronsUpDown, Filter, Search, SlidersHorizontal, X, SortAsc } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -92,13 +92,16 @@ export type CourseFiltersProps = {
   levels: FilterOption[];
   departments: FilterOption[];
   credits: FilterOption[];
+  sortOptions: FilterOption[];
   selectedLevel: string;
   selectedDepartment: string;
   selectedCredits: string;
+  selectedSort: string;
   searchQuery: string;
   onLevelChange: (level: string) => void;
   onDepartmentChange: (department: string) => void;
   onCreditsChange: (credits: string) => void;
+  onSortChange: (sort: string) => void;
   onSearchChange: (search: string) => void;
   onClearFilters: () => void;
 };
@@ -107,17 +110,20 @@ const CourseFilters = ({
   levels,
   departments,
   credits,
+  sortOptions,
   selectedLevel,
   selectedDepartment,
   selectedCredits,
+  selectedSort,
   searchQuery,
   onLevelChange,
   onDepartmentChange,
   onCreditsChange,
+  onSortChange,
   onSearchChange,
   onClearFilters,
 }: CourseFiltersProps) => {
-  const hasActiveFilters = selectedLevel || selectedDepartment || selectedCredits || searchQuery;
+  const hasActiveFilters = selectedLevel || selectedDepartment || selectedCredits || searchQuery || (selectedSort && selectedSort !== "default");
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
@@ -167,7 +173,7 @@ const CourseFilters = ({
 
       {/* Desktop filters */}
       <div className="hidden md:block">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <FilterSelect
             title="Level"
             options={levels}
@@ -185,6 +191,12 @@ const CourseFilters = ({
             options={credits}
             value={selectedCredits}
             onChange={onCreditsChange}
+          />
+          <FilterSelect
+            title="Sort By"
+            options={sortOptions}
+            value={selectedSort}
+            onChange={onSortChange}
           />
         </div>
       </div>
@@ -265,6 +277,26 @@ const CourseFilters = ({
                   </div>
                 </AccordionContent>
               </AccordionItem>
+
+              <AccordionItem value="sort">
+                <AccordionTrigger>Sort By</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    {sortOptions.map((option) => (
+                      <div 
+                        key={option.value} 
+                        className="flex items-center"
+                        onClick={() => onSortChange(option.value === selectedSort ? "default" : option.value)}
+                      >
+                        <div className={`w-4 h-4 mr-2 rounded-sm border ${option.value === selectedSort ? 'bg-primary border-primary' : 'border-gray-300'} flex items-center justify-center`}>
+                          {option.value === selectedSort && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <span>{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </div>
         )}
@@ -311,6 +343,17 @@ const CourseFilters = ({
               Credits: {credits.find(c => c.value === selectedCredits)?.label}
               <button 
                 onClick={() => onCreditsChange("")}
+                className="ml-2 hover:text-primary/80"
+              >
+                ×
+              </button>
+            </div>
+          )}
+          {selectedSort && selectedSort !== "default" && (
+            <div className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full flex items-center">
+              Sort: {sortOptions.find(s => s.value === selectedSort)?.label}
+              <button 
+                onClick={() => onSortChange("default")}
                 className="ml-2 hover:text-primary/80"
               >
                 ×

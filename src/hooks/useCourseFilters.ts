@@ -8,11 +8,14 @@ type FilterOption = {
   label: string;
 };
 
+type SortOption = "default" | "title-asc" | "title-desc" | "credits-asc" | "credits-desc" | "popularity";
+
 export const useCourseFilters = (courses: Course[]) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedCredits, setSelectedCredits] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("default");
 
   const levelOptions = useMemo(() => {
     const levels = Array.from(new Set(courses.map(c => c.level)));
@@ -29,8 +32,18 @@ export const useCourseFilters = (courses: Course[]) => {
     return credits.map(credit => ({ value: credit.toString(), label: `${credit} Credits` }));
   }, [courses]);
 
+  const sortOptions = [
+    { value: "default", label: "Default Order" },
+    { value: "title-asc", label: "Title (A-Z)" },
+    { value: "title-desc", label: "Title (Z-A)" },
+    { value: "credits-asc", label: "Credits (Low to High)" },
+    { value: "credits-desc", label: "Credits (High to Low)" },
+    { value: "popularity", label: "Popularity" },
+  ];
+
   const filteredCourses = useMemo(() => {
-    return courses.filter(course => {
+    // First apply filters
+    const filtered = courses.filter(course => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = 
@@ -55,31 +68,54 @@ export const useCourseFilters = (courses: Course[]) => {
       
       return true;
     });
-  }, [courses, searchQuery, selectedLevel, selectedDepartment, selectedCredits]);
+
+    // Then sort the filtered results
+    return [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "title-asc":
+          return a.title.localeCompare(b.title);
+        case "title-desc":
+          return b.title.localeCompare(a.title);
+        case "credits-asc":
+          return a.credits - b.credits;
+        case "credits-desc":
+          return b.credits - a.credits;
+        case "popularity":
+          const popularityWeight = { "High": 3, "Medium": 2, "Low": 1, undefined: 0 };
+          return (popularityWeight[b.popularity ?? undefined] || 0) - (popularityWeight[a.popularity ?? undefined] || 0);
+        default:
+          return 0;
+      }
+    });
+  }, [courses, searchQuery, selectedLevel, selectedDepartment, selectedCredits, sortBy]);
 
   const clearFilters = () => {
     setSelectedLevel("");
     setSelectedDepartment("");
     setSelectedCredits("");
     setSearchQuery("");
+    setSortBy("default");
     toast("All filters have been cleared");
   };
 
   // Convert to a proper boolean by checking if any filter has a value
-  const hasActiveFilters = !!(selectedLevel || selectedDepartment || selectedCredits || searchQuery);
+  const hasActiveFilters = !!(selectedLevel || selectedDepartment || selectedCredits || searchQuery || sortBy !== "default");
 
   return {
     searchQuery,
     selectedLevel,
     selectedDepartment,
     selectedCredits,
+    sortBy,
     setSearchQuery,
     setSelectedLevel,
     setSelectedDepartment,
     setSelectedCredits,
+    setSortBy,
     levelOptions,
     departmentOptions,
     creditOptions,
+    sortOptions,
     filteredCourses,
     clearFilters,
     hasActiveFilters

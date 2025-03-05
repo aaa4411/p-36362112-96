@@ -7,7 +7,9 @@ import { Course } from "@/types/course";
 type CourseGridProps = {
   courses: Course[];
   selectedCourses: Course[];
+  favoriteCourseIds: string[];
   onToggleCourseComparison: (course: Course) => void;
+  onToggleFavoriteCourse: (courseId: string, courseName: string) => void;
   onViewCourseDetails: (courseId: string) => void;
   onClearFilters: () => void;
 };
@@ -15,7 +17,9 @@ type CourseGridProps = {
 const CourseGrid = ({ 
   courses, 
   selectedCourses, 
+  favoriteCourseIds,
   onToggleCourseComparison, 
+  onToggleFavoriteCourse,
   onViewCourseDetails,
   onClearFilters
 }: CourseGridProps) => {
@@ -37,7 +41,9 @@ const CourseGrid = ({
           key={course.id}
           course={course}
           isSelected={selectedCourses.some(c => c.id === course.id)}
+          isFavorite={favoriteCourseIds.includes(course.id)}
           onToggleComparison={() => onToggleCourseComparison(course)}
+          onToggleFavorite={() => onToggleFavoriteCourse(course.id, course.title)}
           onViewDetails={() => onViewCourseDetails(course.id)}
         />
       ))}

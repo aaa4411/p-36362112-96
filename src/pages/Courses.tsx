@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
@@ -14,23 +15,31 @@ import CourseGrid from "@/components/courses/CourseGrid";
 import RegistrationInfo from "@/components/courses/RegistrationInfo";
 import CourseComparisonBar from "@/components/courses/CourseComparisonBar";
 import CourseChartData from "@/components/courses/CourseChartData";
+import FavoriteCourses from "@/components/courses/FavoriteCourses";
+import SkipToContent from "@/components/SkipToContent";
 import { useCourseFilters } from "@/hooks/useCourseFilters";
 import { useCourseComparison } from "@/hooks/useCourseComparison";
+import { useFavoriteCourses } from "@/hooks/useFavoriteCourses";
 import { courses, categories, featuredCourse } from "@/data/coursesData";
 
 const Courses = () => {
+  const [searchParams] = useSearchParams();
+  
   const {
     searchQuery,
     selectedLevel,
     selectedDepartment,
     selectedCredits,
+    sortBy,
     setSearchQuery,
     setSelectedLevel,
     setSelectedDepartment,
     setSelectedCredits,
+    setSortBy,
     levelOptions,
     departmentOptions,
     creditOptions,
+    sortOptions,
     filteredCourses,
     clearFilters,
     hasActiveFilters
@@ -45,6 +54,20 @@ const Courses = () => {
     clearComparison
   } = useCourseComparison();
 
+  const {
+    favoriteCourses: favoriteCourseIds,
+    toggleFavoriteCourse,
+    isFavoriteCourse
+  } = useFavoriteCourses();
+
+  // Apply search param from URL
+  useEffect(() => {
+    const searchFromUrl = searchParams.get("search");
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+    }
+  }, [searchParams, setSearchQuery]);
+
   const handleViewCourseDetails = (courseId: string) => {
     toast(`Viewing details for course ${courseId}`, {
       description: "Feature coming soon",
@@ -53,11 +76,12 @@ const Courses = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SkipToContent />
       <Navbar />
       
       <CourseBanner />
       
-      <main className="container mx-auto px-4 py-12 md:py-20">
+      <main id="main-content" className="container mx-auto px-4 py-12 md:py-20">
         <CourseComparisonBar 
           coursesToCompare={coursesToCompare}
           onClearComparison={clearComparison}
@@ -73,6 +97,21 @@ const Courses = () => {
         
         <div className="mb-16">
           <FeaturedCourse course={featuredCourse} />
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">Course Catalog</h1>
+            <span className="bg-gray-100 text-gray-600 text-sm px-2 py-0.5 rounded-full">
+              {courses.length} Courses
+            </span>
+          </div>
+          <FavoriteCourses 
+            favoriteCourseIds={favoriteCourseIds}
+            allCourses={courses}
+            onRemoveFavorite={toggleFavoriteCourse}
+            onViewCourseDetails={handleViewCourseDetails}
+          />
         </div>
         
         <div className="flex flex-col lg:flex-row gap-8">
@@ -91,13 +130,16 @@ const Courses = () => {
               levels={levelOptions}
               departments={departmentOptions}
               credits={creditOptions}
+              sortOptions={sortOptions}
               selectedLevel={selectedLevel}
               selectedDepartment={selectedDepartment}
               selectedCredits={selectedCredits}
+              selectedSort={sortBy}
               searchQuery={searchQuery}
               onLevelChange={setSelectedLevel}
               onDepartmentChange={setSelectedDepartment}
               onCreditsChange={setSelectedCredits}
+              onSortChange={setSortBy}
               onSearchChange={setSearchQuery}
               onClearFilters={clearFilters}
             />
@@ -105,7 +147,9 @@ const Courses = () => {
             <CourseGrid 
               courses={filteredCourses}
               selectedCourses={coursesToCompare}
+              favoriteCourseIds={favoriteCourseIds}
               onToggleCourseComparison={toggleCourseComparison}
+              onToggleFavoriteCourse={toggleFavoriteCourse}
               onViewCourseDetails={handleViewCourseDetails}
               onClearFilters={clearFilters}
             />

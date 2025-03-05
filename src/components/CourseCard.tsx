@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, PlusCircle, ArrowRight, UserCircle2, CalendarDays, Code, Layers, Database, GraduationCap, Server, Globe, Shield, Users, Book } from 'lucide-react';
+import { Check, PlusCircle, ArrowRight, UserCircle2, CalendarDays, Heart, Code, Layers, Database, GraduationCap, Server, Globe, Shield, Users, Book } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -17,7 +17,9 @@ import { Course } from "@/types/course";
 interface CourseCardProps {
   course: Course;
   isSelected: boolean;
+  isFavorite: boolean;
   onToggleComparison: () => void;
+  onToggleFavorite: () => void;
   onViewDetails: () => void;
 }
 
@@ -48,7 +50,9 @@ const getIconComponent = (iconName: string) => {
 export const CourseCard: React.FC<CourseCardProps> = ({
   course,
   isSelected,
+  isFavorite,
   onToggleComparison,
+  onToggleFavorite,
   onViewDetails,
 }) => {
   return (
@@ -63,6 +67,17 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             )}>
               {course.level}
             </Badge>
+            <button 
+              onClick={onToggleFavorite}
+              className={`p-1.5 rounded-full transition-all ${isFavorite 
+                ? 'bg-red-100 text-red-500' 
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              aria-label={isFavorite 
+                ? `Remove ${course.title} from favorites` 
+                : `Add ${course.title} to favorites`}
+            >
+              <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500' : ''}`} />
+            </button>
             <button 
               onClick={onToggleComparison}
               className={`p-1.5 rounded-full transition-all ${isSelected 
