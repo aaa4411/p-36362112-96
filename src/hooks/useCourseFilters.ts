@@ -8,7 +8,7 @@ type FilterOption = {
   label: string;
 };
 
-type SortOption = "default" | "title-asc" | "title-desc" | "credits-asc" | "credits-desc" | "popularity";
+export type SortOption = "default" | "title-asc" | "title-desc" | "credits-asc" | "credits-desc" | "popularity";
 
 export const useCourseFilters = (courses: Course[]) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,6 +101,11 @@ export const useCourseFilters = (courses: Course[]) => {
   // Convert to a proper boolean by checking if any filter has a value
   const hasActiveFilters = !!(selectedLevel || selectedDepartment || selectedCredits || searchQuery || sortBy !== "default");
 
+  // Custom handler for setting sort by string value
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort as SortOption);
+  };
+
   return {
     searchQuery,
     selectedLevel,
@@ -111,7 +116,7 @@ export const useCourseFilters = (courses: Course[]) => {
     setSelectedLevel,
     setSelectedDepartment,
     setSelectedCredits,
-    setSortBy,
+    setSortBy: handleSortChange,
     levelOptions,
     departmentOptions,
     creditOptions,

@@ -17,7 +17,7 @@ import CourseComparisonBar from "@/components/courses/CourseComparisonBar";
 import CourseChartData from "@/components/courses/CourseChartData";
 import FavoriteCourses from "@/components/courses/FavoriteCourses";
 import SkipToContent from "@/components/SkipToContent";
-import { useCourseFilters } from "@/hooks/useCourseFilters";
+import { useCourseFilters, SortOption } from "@/hooks/useCourseFilters";
 import { useCourseComparison } from "@/hooks/useCourseComparison";
 import { useFavoriteCourses } from "@/hooks/useFavoriteCourses";
 import { courses, categories, featuredCourse } from "@/data/coursesData";
