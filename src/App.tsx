@@ -16,6 +16,14 @@ import Courses from "./pages/Courses";
 import Faculty from "./pages/Faculty";
 import Opportunities from "./pages/Opportunities";
 
+// Admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminOverview from "./pages/admin/Overview";
+import AdminCourses from "./pages/admin/Courses";
+import AdminUsers from "./pages/admin/Users";
+import AdminEvents from "./pages/admin/Events";
+import AdminSettings from "./pages/admin/Settings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -36,6 +44,15 @@ const App = () => (
             <Route path="/courses" element={<Courses />} />
             <Route path="/faculty" element={<Faculty />} />
             <Route path="/opportunities" element={<Opportunities />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />}>
+              <Route index element={<AdminOverview />} />
+              <Route path="courses" element={<AdminCourses />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
