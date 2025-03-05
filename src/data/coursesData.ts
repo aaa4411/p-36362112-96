@@ -2,6 +2,19 @@
 import { Book, GraduationCap, Code, Shield, Database, Server, Globe, Layers, Users } from "lucide-react";
 import { Course, CategoryType } from "@/types/course";
 
+// Create a mapping of icon names to their string representations
+export const iconMap = {
+  code: "Code",
+  layers: "Layers",
+  database: "Database",
+  graduationCap: "GraduationCap",
+  server: "Server",
+  globe: "Globe",
+  shield: "Shield",
+  users: "Users",
+  book: "Book"
+};
+
 export const courses: Course[] = [
   {
     id: "cs101",
@@ -12,7 +25,7 @@ export const courses: Course[] = [
     credits: 3,
     prerequisites: [],
     department: "Computer Science",
-    icon: <Code className="h-8 w-8 text-primary" />,
+    iconName: "code",
     instructor: "Dr. Alex Morgan",
     enrollmentStatus: "Open",
     startDate: "September 15, 2024",
@@ -27,7 +40,7 @@ export const courses: Course[] = [
     credits: 4,
     prerequisites: ["CS 101"],
     department: "Computer Science",
-    icon: <Layers className="h-8 w-8 text-primary" />,
+    iconName: "layers",
     instructor: "Prof. James Wilson",
     enrollmentStatus: "Open",
     startDate: "September 12, 2024",
@@ -42,7 +55,7 @@ export const courses: Course[] = [
     credits: 3,
     prerequisites: ["CS 201"],
     department: "Computer Science",
-    icon: <Database className="h-8 w-8 text-primary" />,
+    iconName: "database",
     instructor: "Dr. Maya Patel",
     enrollmentStatus: "Closing Soon",
     startDate: "September 10, 2024",
@@ -57,7 +70,7 @@ export const courses: Course[] = [
     credits: 4,
     prerequisites: ["CS 201", "MATH 250"],
     department: "Computer Science",
-    icon: <GraduationCap className="h-8 w-8 text-primary" />,
+    iconName: "graduationCap",
     instructor: "Prof. Sarah Johnson",
     enrollmentStatus: "Closing Soon",
     startDate: "September 18, 2024",
@@ -72,7 +85,7 @@ export const courses: Course[] = [
     credits: 3,
     prerequisites: [],
     department: "Information Systems",
-    icon: <Server className="h-8 w-8 text-primary" />,
+    iconName: "server",
     instructor: "Dr. Kevin Zhang",
     enrollmentStatus: "Open",
     startDate: "September 20, 2024",
@@ -87,7 +100,7 @@ export const courses: Course[] = [
     credits: 3,
     prerequisites: ["IS 101"],
     department: "Information Systems",
-    icon: <Globe className="h-8 w-8 text-primary" />,
+    iconName: "globe",
     instructor: "Prof. Emily Chen",
     enrollmentStatus: "Open",
     startDate: "September 25, 2024",
@@ -102,7 +115,7 @@ export const courses: Course[] = [
     credits: 3,
     prerequisites: ["IS 201"],
     department: "Information Systems",
-    icon: <Shield className="h-8 w-8 text-primary" />,
+    iconName: "shield",
     instructor: "Dr. Robert Stevens",
     enrollmentStatus: "Closed",
     startDate: "October 5, 2024",
@@ -117,7 +130,7 @@ export const courses: Course[] = [
     credits: 3,
     prerequisites: ["IS 301"],
     department: "Information Systems",
-    icon: <Users className="h-8 w-8 text-primary" />,
+    iconName: "users",
     instructor: "Prof. Lisa Moore",
     enrollmentStatus: "Closing Soon",
     startDate: "October 10, 2024",

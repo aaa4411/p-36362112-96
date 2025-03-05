@@ -1,34 +1,40 @@
-
 import React from 'react';
 import { 
   GraduationCap,
   Users,
   CalendarDays,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Code,
+  Layers,
+  Database,
+  Server,
+  Globe,
+  Shield,
+  Book
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-type Course = {
-  id: string;
-  code: string;
-  title: string;
-  description: string;
-  level: string;
-  credits: number;
-  prerequisites: string[];
-  department: string;
-  icon: React.ReactNode;
-  instructor?: string;
-  enrollmentStatus?: "Open" | "Closing Soon" | "Closed";
-  startDate?: string;
-  popularity?: "High" | "Medium" | "Low";
-};
+import { Course } from "@/types/course";
 
 interface FeaturedCourseProps {
   course: Course;
 }
+
+const getIconComponent = (iconName: string) => {
+  switch (iconName) {
+    case "code": return <Code className="h-8 w-8 text-primary" />;
+    case "layers": return <Layers className="h-8 w-8 text-primary" />;
+    case "database": return <Database className="h-8 w-8 text-primary" />;
+    case "graduationCap": return <GraduationCap className="h-8 w-8 text-primary" />;
+    case "server": return <Server className="h-8 w-8 text-primary" />;
+    case "globe": return <Globe className="h-8 w-8 text-primary" />;
+    case "shield": return <Shield className="h-8 w-8 text-primary" />;
+    case "users": return <Users className="h-8 w-8 text-primary" />;
+    case "book": return <Book className="h-8 w-8 text-primary" />;
+    default: return <Book className="h-8 w-8 text-primary" />;
+  }
+};
 
 export const FeaturedCourse: React.FC<FeaturedCourseProps> = ({ course }) => {
   return (
@@ -40,7 +46,7 @@ export const FeaturedCourse: React.FC<FeaturedCourseProps> = ({ course }) => {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="p-8 md:p-10">
           <div className="inline-block mb-4 p-3 bg-primary/10 rounded-lg">
-            {course.icon}
+            {getIconComponent(course.iconName)}
           </div>
           
           <div className="mb-3">

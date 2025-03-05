@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, PlusCircle, ArrowRight, UserCircle2, CalendarDays } from 'lucide-react';
+import { Check, PlusCircle, ArrowRight, UserCircle2, CalendarDays, Code, Layers, Database, GraduationCap, Server, Globe, Shield, Users, Book } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -12,22 +12,7 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-type Course = {
-  id: string;
-  code: string;
-  title: string;
-  description: string;
-  level: string;
-  credits: number;
-  prerequisites: string[];
-  department: string;
-  icon: React.ReactNode;
-  instructor?: string;
-  enrollmentStatus?: "Open" | "Closing Soon" | "Closed";
-  startDate?: string;
-  popularity?: "High" | "Medium" | "Low";
-};
+import { Course } from "@/types/course";
 
 interface CourseCardProps {
   course: Course;
@@ -45,6 +30,21 @@ const getEnrollmentStatusColor = (status?: "Open" | "Closing Soon" | "Closed") =
   }
 };
 
+const getIconComponent = (iconName: string) => {
+  switch (iconName) {
+    case "code": return <Code className="h-8 w-8 text-primary" />;
+    case "layers": return <Layers className="h-8 w-8 text-primary" />;
+    case "database": return <Database className="h-8 w-8 text-primary" />;
+    case "graduationCap": return <GraduationCap className="h-8 w-8 text-primary" />;
+    case "server": return <Server className="h-8 w-8 text-primary" />;
+    case "globe": return <Globe className="h-8 w-8 text-primary" />;
+    case "shield": return <Shield className="h-8 w-8 text-primary" />;
+    case "users": return <Users className="h-8 w-8 text-primary" />;
+    case "book": return <Book className="h-8 w-8 text-primary" />;
+    default: return <Book className="h-8 w-8 text-primary" />;
+  }
+};
+
 export const CourseCard: React.FC<CourseCardProps> = ({
   course,
   isSelected,
@@ -55,7 +55,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
     <Card className="overflow-hidden transition-all hover:shadow-md hover:border-primary/20">
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
-          <div className="bg-primary/10 rounded-lg p-2">{course.icon}</div>
+          <div className="bg-primary/10 rounded-lg p-2">{getIconComponent(course.iconName)}</div>
           <div className="flex gap-2">
             <Badge variant="outline" className={cn(
               "font-medium", 

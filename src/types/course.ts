@@ -10,7 +10,7 @@ export type Course = {
   credits: number;
   prerequisites: string[];
   department: string;
-  icon: ReactNode;
+  iconName: string;
   instructor?: string;
   enrollmentStatus?: "Open" | "Closing Soon" | "Closed";
   startDate?: string;

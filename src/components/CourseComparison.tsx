@@ -1,6 +1,5 @@
-
 import React from "react";
-import { X, Check, Minus, UserCircle2, CalendarDays, Clock, BookOpen } from "lucide-react";
+import { X, Check, Minus, UserCircle2, CalendarDays, Clock, BookOpen, Code, Layers, Database, GraduationCap, Server, Globe, Shield, Users, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,22 +10,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-type Course = {
-  id: string;
-  code: string;
-  title: string;
-  description: string;
-  level: string;
-  credits: number;
-  prerequisites: string[];
-  department: string;
-  icon: React.ReactNode;
-  instructor?: string;
-  enrollmentStatus?: "Open" | "Closing Soon" | "Closed";
-  startDate?: string;
-  popularity?: "High" | "Medium" | "Low";
-};
+import { Course } from "@/types/course";
 
 interface CourseComparisonProps {
   courses: Course[];
@@ -39,6 +23,21 @@ const getEnrollmentStatusColor = (status?: "Open" | "Closing Soon" | "Closed") =
     case "Closing Soon": return "bg-amber-100 text-amber-800";
     case "Closed": return "bg-red-100 text-red-800";
     default: return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getIconComponent = (iconName: string) => {
+  switch (iconName) {
+    case "code": return <Code className="h-8 w-8 text-primary" />;
+    case "layers": return <Layers className="h-8 w-8 text-primary" />;
+    case "database": return <Database className="h-8 w-8 text-primary" />;
+    case "graduationCap": return <GraduationCap className="h-8 w-8 text-primary" />;
+    case "server": return <Server className="h-8 w-8 text-primary" />;
+    case "globe": return <Globe className="h-8 w-8 text-primary" />;
+    case "shield": return <Shield className="h-8 w-8 text-primary" />;
+    case "users": return <Users className="h-8 w-8 text-primary" />;
+    case "book": return <Book className="h-8 w-8 text-primary" />;
+    default: return <Book className="h-8 w-8 text-primary" />;
   }
 };
 
@@ -126,7 +125,7 @@ const CourseComparison = ({ courses, onClose }: CourseComparisonProps) => {
                   >
                     <div className="flex items-center gap-2">
                       <div className="bg-primary/10 p-1.5 rounded-lg">
-                        {course.icon}
+                        {getIconComponent(course.iconName)}
                       </div>
                       <div>
                         <div className="text-xs text-gray-500">{course.code}</div>
