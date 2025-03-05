@@ -8,17 +8,33 @@ import {
   Settings, 
   BarChart3, 
   LogOut,
-  Home
+  Home,
+  BellRing
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
   // In a real app, this would check authentication
   const isAuthenticated = true;
+
+  const handleLogout = () => {
+    toast.success("Logged out successfully");
+    navigate("/");
+  };
 
   if (!isAuthenticated) {
     return (
@@ -38,48 +54,57 @@ const AdminDashboard = () => {
     );
   }
 
+  const menuItems = [
+    { icon: BarChart3, label: "Overview", path: "/admin" },
+    { icon: GraduationCap, label: "Courses", path: "/admin/courses" },
+    { icon: Users, label: "Users", path: "/admin/users" },
+    { icon: Calendar, label: "Events", path: "/admin/events" },
+  ];
+
+  const systemItems = [
+    { icon: Settings, label: "Settings", path: "/admin/settings" },
+  ];
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <div className="w-64 bg-gray-900 text-white py-6 flex flex-col">
-        <div className="px-6 mb-8">
-          <h1 className="text-xl font-bold flex items-center">
-            <GraduationCap className="mr-2" />
-            Admin Dashboard
-          </h1>
+        <div className="px-6 mb-8 flex items-center">
+          <GraduationCap className="w-6 h-6 mr-2" />
+          <h1 className="text-xl font-bold">Admin Portal</h1>
         </div>
         
         <nav className="flex-1">
           <div className="px-4 mb-2 text-xs uppercase tracking-wider text-gray-400">Main</div>
-          <Link to="/admin" className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-            <BarChart3 className="h-5 w-5 mr-3" />
-            Overview
-          </Link>
-          <Link to="/admin/courses" className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-            <GraduationCap className="h-5 w-5 mr-3" />
-            Courses
-          </Link>
-          <Link to="/admin/users" className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-            <Users className="h-5 w-5 mr-3" />
-            Users
-          </Link>
-          <Link to="/admin/events" className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-            <Calendar className="h-5 w-5 mr-3" />
-            Events
-          </Link>
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <item.icon className="h-5 w-5 mr-3" />
+              {item.label}
+            </Link>
+          ))}
           
           <div className="px-4 mt-6 mb-2 text-xs uppercase tracking-wider text-gray-400">System</div>
-          <Link to="/admin/settings" className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white">
-            <Settings className="h-5 w-5 mr-3" />
-            Settings
-          </Link>
+          {systemItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+            >
+              <item.icon className="h-5 w-5 mr-3" />
+              {item.label}
+            </Link>
+          ))}
           
-          <div className="mt-auto px-6 py-4">
+          <div className="mt-auto px-6 py-4 space-y-2">
             <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white" onClick={() => navigate("/")}>
               <Home className="h-5 w-5 mr-2" />
               View Site
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white">
+            <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white" onClick={handleLogout}>
               <LogOut className="h-5 w-5 mr-2" />
               Logout
             </Button>
@@ -89,12 +114,35 @@ const AdminDashboard = () => {
       
       {/* Main content */}
       <div className="flex-1 bg-gray-100">
-        <div className="py-4 px-6 bg-white border-b">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium">Admin Portal</h2>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Admin User</span>
-            </div>
+        <div className="py-4 px-6 bg-white border-b flex items-center justify-between">
+          <h2 className="text-lg font-medium">Admin Portal</h2>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon" className="relative">
+              <BellRing className="h-5 w-5" />
+              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />
+            </Button>
+            <Separator orientation="vertical" className="h-8" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative flex items-center space-x-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://github.com/shadcn.png" alt="Admin" />
+                    <AvatarFallback>AD</AvatarFallback>
+                  </Avatar>
+                  <span>Admin User</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         
