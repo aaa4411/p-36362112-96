@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,7 +20,11 @@ import {
   PlusCircle,
   Check,
   X,
-  ScaleIcon
+  ScaleIcon,
+  UserCircle2,
+  CalendarDays,
+  BookOpen,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,11 +36,16 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import CourseFilters from "@/components/CourseFilters";
 import { toast } from "sonner";
 import CourseComparison from "@/components/CourseComparison";
 import CourseDistributionChart from "@/components/CourseDistributionChart";
 import { generateChartColors } from "@/lib/utils";
+import { FeaturedCourse } from "@/components/FeaturedCourse";
+import { CourseCard } from "@/components/CourseCard";
+import { cn } from "@/lib/utils";
 
 type Course = {
   id: string;
@@ -47,6 +57,10 @@ type Course = {
   prerequisites: string[];
   department: string;
   icon: React.ReactNode;
+  instructor?: string;
+  enrollmentStatus?: "Open" | "Closing Soon" | "Closed";
+  startDate?: string;
+  popularity?: "High" | "Medium" | "Low";
 };
 
 const courses: Course[] = [
@@ -60,6 +74,10 @@ const courses: Course[] = [
     prerequisites: [],
     department: "Computer Science",
     icon: <Code className="h-8 w-8 text-primary" />,
+    instructor: "Dr. Alex Morgan",
+    enrollmentStatus: "Open",
+    startDate: "September 15, 2024",
+    popularity: "High"
   },
   {
     id: "cs201",
@@ -71,6 +89,10 @@ const courses: Course[] = [
     prerequisites: ["CS 101"],
     department: "Computer Science",
     icon: <Layers className="h-8 w-8 text-primary" />,
+    instructor: "Prof. James Wilson",
+    enrollmentStatus: "Open",
+    startDate: "September 12, 2024",
+    popularity: "High"
   },
   {
     id: "cs301",
@@ -82,6 +104,10 @@ const courses: Course[] = [
     prerequisites: ["CS 201"],
     department: "Computer Science",
     icon: <Database className="h-8 w-8 text-primary" />,
+    instructor: "Dr. Maya Patel",
+    enrollmentStatus: "Closing Soon",
+    startDate: "September 10, 2024",
+    popularity: "Medium"
   },
   {
     id: "cs401",
@@ -93,6 +119,10 @@ const courses: Course[] = [
     prerequisites: ["CS 201", "MATH 250"],
     department: "Computer Science",
     icon: <GraduationCap className="h-8 w-8 text-primary" />,
+    instructor: "Prof. Sarah Johnson",
+    enrollmentStatus: "Closing Soon",
+    startDate: "September 18, 2024",
+    popularity: "High"
   },
   {
     id: "is101",
@@ -104,6 +134,10 @@ const courses: Course[] = [
     prerequisites: [],
     department: "Information Systems",
     icon: <Server className="h-8 w-8 text-primary" />,
+    instructor: "Dr. Kevin Zhang",
+    enrollmentStatus: "Open",
+    startDate: "September 20, 2024",
+    popularity: "Medium"
   },
   {
     id: "is201",
@@ -115,6 +149,10 @@ const courses: Course[] = [
     prerequisites: ["IS 101"],
     department: "Information Systems",
     icon: <Globe className="h-8 w-8 text-primary" />,
+    instructor: "Prof. Emily Chen",
+    enrollmentStatus: "Open",
+    startDate: "September 25, 2024",
+    popularity: "High"
   },
   {
     id: "is301",
@@ -126,6 +164,10 @@ const courses: Course[] = [
     prerequisites: ["IS 201"],
     department: "Information Systems",
     icon: <Shield className="h-8 w-8 text-primary" />,
+    instructor: "Dr. Robert Stevens",
+    enrollmentStatus: "Closed",
+    startDate: "October 5, 2024",
+    popularity: "Medium"
   },
   {
     id: "is401",
@@ -137,6 +179,10 @@ const courses: Course[] = [
     prerequisites: ["IS 301"],
     department: "Information Systems",
     icon: <Users className="h-8 w-8 text-primary" />,
+    instructor: "Prof. Lisa Moore",
+    enrollmentStatus: "Closing Soon",
+    startDate: "October 10, 2024",
+    popularity: "Low"
   },
 ];
 
@@ -147,6 +193,26 @@ const categories = [
   { name: "Database", count: courses.filter(c => c.title.includes("Database")).length },
   { name: "Web Development", count: courses.filter(c => c.title.includes("Web")).length },
 ];
+
+const featuredCourse = courses[3]; // CS 401 - Artificial Intelligence
+
+const getEnrollmentStatusColor = (status: Course["enrollmentStatus"]) => {
+  switch (status) {
+    case "Open": return "bg-green-100 text-green-800";
+    case "Closing Soon": return "bg-amber-100 text-amber-800";
+    case "Closed": return "bg-red-100 text-red-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getPopularityColor = (popularity: Course["popularity"]) => {
+  switch (popularity) {
+    case "High": return "text-green-600";
+    case "Medium": return "text-amber-600";
+    case "Low": return "text-blue-600";
+    default: return "text-gray-600";
+  }
+};
 
 const Courses = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -271,16 +337,26 @@ const Courses = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="bg-primary text-white py-8 md:py-16">
+      <div className="bg-gradient-to-r from-primary to-primary/80 text-white py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Course Catalog</h1>
-          <p className="text-lg md:text-xl max-w-3xl">
-            Explore our comprehensive range of computing and information technology courses designed to prepare you for success in the digital world.
-          </p>
+          <div className="max-w-3xl">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 font-playfair">Course Catalog</h1>
+            <p className="text-lg md:text-xl opacity-90">
+              Explore our comprehensive range of computing and information technology courses designed to prepare you for success in the digital world.
+            </p>
+            <div className="flex gap-4 mt-8">
+              <Button size="lg" className="bg-white text-primary hover:bg-gray-100">
+                Browse Courses
+              </Button>
+              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+                Academic Calendar
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
       
-      <main className="container mx-auto px-4 py-8 md:py-16">
+      <main className="container mx-auto px-4 py-12 md:py-20">
         {coursesToCompare.length > 0 && (
           <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t z-30 p-4 animate-slide-in-bottom">
             <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
@@ -317,19 +393,26 @@ const Courses = () => {
           />
         )}
         
+        <div className="mb-16">
+          <FeaturedCourse course={featuredCourse} />
+        </div>
+        
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-1/4 space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-4">Course Categories</h2>
-              <ul className="space-y-2">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                Course Categories
+              </h2>
+              <ul className="space-y-3">
                 {categories.map((category) => (
                   <li key={category.name}>
                     <Link 
                       to={`#${category.name.toLowerCase().replace(/\s+/g, '-')}`} 
-                      className="flex items-center justify-between text-gray-700 hover:text-primary"
+                      className="flex items-center justify-between text-gray-700 hover:text-primary transition-colors group"
                     >
-                      <span>{category.name}</span>
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+                      <span className="group-hover:translate-x-1 transition-transform">{category.name}</span>
+                      <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-xs font-medium">
                         {category.count}
                       </span>
                     </Link>
@@ -340,25 +423,48 @@ const Courses = () => {
             
             <CourseDistributionChart data={chartData} />
             
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-bold mb-4">Need Help?</h2>
-              <p className="text-gray-700 mb-4">
-                Contact our academic advisors for course selection guidance or registration assistance.
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                Academic Support
+              </h2>
+              <p className="text-gray-700 mb-6">
+                Need course selection guidance or registration assistance? Our academic advisors are here to help you succeed.
               </p>
-              <Button className="w-full">Contact Advisor</Button>
+              <div className="space-y-3">
+                <Button className="w-full">Contact Advisor</Button>
+                <Button variant="outline" className="w-full">View FAQ</Button>
+              </div>
+              
+              <Separator className="my-6" />
+              
+              <div className="bg-primary/5 p-4 rounded-lg">
+                <h3 className="font-medium text-primary mb-2">Next Registration Period</h3>
+                <div className="flex items-center gap-2 text-sm">
+                  <CalendarDays className="h-4 w-4 text-primary" />
+                  <span>July 1, 2024 - August 15, 2024</span>
+                </div>
+              </div>
             </div>
           </div>
           
           <div className="lg:w-3/4">
-            <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
-              <h2 className="text-2xl font-bold mb-4">Course Listings</h2>
-              <p className="text-gray-700 mb-2">
-                Browse through our available courses. Click on any course for detailed information including syllabus, instructors, and registration details.
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-8">
+              <h2 className="text-2xl font-bold mb-2">Course Listings</h2>
+              <p className="text-gray-700 mb-4">
+                Browse through our available courses. Select any course for detailed information including syllabus, instructors, and registration details.
               </p>
               
-              <div className="flex items-center text-sm text-gray-500 mt-4">
-                <Clock size={16} className="mr-2" />
-                <span>Last updated: June 15, 2024</span>
+              <div className="flex flex-wrap gap-4 mt-6">
+                <div className="flex items-center text-sm text-gray-600 bg-gray-50 rounded-full px-3 py-1.5">
+                  <Clock size={16} className="mr-2 text-primary/70" />
+                  <span>Last updated: June 15, 2024</span>
+                </div>
+                
+                <div className="flex items-center text-sm text-gray-600 bg-gray-50 rounded-full px-3 py-1.5">
+                  <Book size={16} className="mr-2 text-primary/70" />
+                  <span>{courses.length} Total Courses</span>
+                </div>
               </div>
             </div>
             
@@ -377,93 +483,42 @@ const Courses = () => {
               onClearFilters={clearFilters}
             />
             
-            <div className="mb-6 text-gray-700">
-              Found <span className="font-medium">{filteredCourses.length}</span> courses
+            <div className="mb-6 font-medium text-gray-600">
+              Found <span className="text-primary font-semibold">{filteredCourses.length}</span> courses
               {(selectedLevel || selectedDepartment || selectedCredits || searchQuery) && 
                 " matching your criteria"}
             </div>
             
             {filteredCourses.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 {filteredCourses.map((course) => (
-                  <Card key={course.id} className="overflow-hidden">
-                    <CardHeader className="pb-4">
-                      <div className="flex justify-between items-start">
-                        <div className="bg-primary/10 rounded-lg p-2">{course.icon}</div>
-                        <div className="flex gap-2">
-                          <div className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                            {course.level}
-                          </div>
-                          <button 
-                            onClick={() => toggleCourseComparison(course)}
-                            className={`p-1 rounded-full ${coursesToCompare.some(c => c.id === course.id) 
-                              ? 'bg-primary/10 text-primary' 
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                            aria-label={coursesToCompare.some(c => c.id === course.id) 
-                              ? `Remove ${course.title} from comparison` 
-                              : `Add ${course.title} to comparison`}
-                          >
-                            {coursesToCompare.some(c => c.id === course.id) 
-                              ? <Check className="h-4 w-4" /> 
-                              : <PlusCircle className="h-4 w-4" />}
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <div className="text-sm font-medium text-gray-500">{course.code}</div>
-                        <CardTitle className="mt-1">{course.title}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription>{course.description}</CardDescription>
-                      <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="font-medium text-gray-500">Department</div>
-                          <div>{course.department}</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-500">Credits</div>
-                          <div>{course.credits}</div>
-                        </div>
-                      </div>
-                      {course.prerequisites.length > 0 && (
-                        <div className="mt-4 text-sm">
-                          <div className="font-medium text-gray-500">Prerequisites</div>
-                          <div>{course.prerequisites.join(", ")}</div>
-                        </div>
-                      )}
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full flex items-center justify-center"
-                        onClick={() => handleViewCourseDetails(course.id)}
-                      >
-                        <span>View Course Details</span>
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                  <CourseCard 
+                    key={course.id}
+                    course={course}
+                    isSelected={coursesToCompare.some(c => c.id === course.id)}
+                    onToggleComparison={() => toggleCourseComparison(course)}
+                    onViewDetails={() => handleViewCourseDetails(course.id)}
+                  />
                 ))}
               </div>
             ) : (
-              <div className="bg-gray-100 rounded-lg p-8 text-center mb-8">
-                <div className="text-gray-500 mb-2">No courses match your filters</div>
-                <Button onClick={clearFilters} variant="outline" size="sm">
-                  Clear Filters
+              <div className="bg-gray-50 rounded-lg p-12 text-center mb-8 border border-gray-200">
+                <div className="text-gray-500 mb-4 font-medium">No courses match your search criteria</div>
+                <Button onClick={clearFilters} variant="outline" size="lg">
+                  Clear All Filters
                 </Button>
               </div>
             )}
             
-            <div className="bg-primary/5 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Registration Information</h3>
-              <p className="text-gray-700 mb-4">
-                Course registration for the Fall 2024 semester opens on July 1, 2024. Continuing students may register online through the student portal.
+            <div className="bg-gray-50 p-8 rounded-lg border border-gray-200">
+              <h3 className="text-xl font-bold mb-3">Registration Information</h3>
+              <p className="text-gray-700 mb-6">
+                Course registration for the Fall 2024 semester opens on July 1, 2024. Continuing students may register online through the student portal. New students should contact the registrar's office for assistance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button>Registration Portal</Button>
                 <Button variant="outline">Academic Calendar</Button>
+                <Button variant="outline">Contact Registrar</Button>
               </div>
             </div>
           </div>
