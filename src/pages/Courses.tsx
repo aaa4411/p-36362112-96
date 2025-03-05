@@ -85,7 +85,7 @@ const Courses = () => {
           <CourseListing 
             courses={courses}
             filteredCoursesCount={filteredCourses.length}
-            hasFilters={hasActiveFilters}
+            hasFilters={hasActiveFilters === true}
           >
             <CourseFilters
               levels={levelOptions}
