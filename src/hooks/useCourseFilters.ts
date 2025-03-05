@@ -65,7 +65,8 @@ export const useCourseFilters = (courses: Course[]) => {
     toast("All filters have been cleared");
   };
 
-  const hasActiveFilters = selectedLevel || selectedDepartment || selectedCredits || searchQuery;
+  // Convert to a proper boolean by checking if any filter has a value
+  const hasActiveFilters = !!(selectedLevel || selectedDepartment || selectedCredits || searchQuery);
 
   return {
     searchQuery,
