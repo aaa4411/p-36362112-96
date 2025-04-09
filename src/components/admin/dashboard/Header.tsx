@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 
 interface HeaderProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -34,11 +34,13 @@ const Header = ({ setIsMobileMenuOpen, handleLogout, getPageTitle }: HeaderProps
     <header className="bg-white border-b shadow-sm z-10">
       <div className="flex items-center justify-between px-4 py-3 sm:px-6">
         <div className="flex items-center -ml-2 md:hidden">
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="mr-2" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="mr-2" onClick={() => setIsMobileMenuOpen(true)}>
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+          </Sheet>
           <h1 className="text-xl font-semibold">{getPageTitle()}</h1>
         </div>
         <div className="hidden md:flex items-center space-x-4">
