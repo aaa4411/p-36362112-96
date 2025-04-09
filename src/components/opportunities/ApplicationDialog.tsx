@@ -65,7 +65,7 @@ const ApplicationDialog: React.FC<ApplicationDialogProps> = ({
           </Button>
           <Button
             onClick={onSubmit}
-            isLoading={isApplying}
+            disabled={isApplying}
           >
             {isApplying ? "Submitting..." : "Submit Application"}
           </Button>

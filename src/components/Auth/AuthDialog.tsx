@@ -114,8 +114,8 @@ const AuthDialog = ({ isOpen, onClose, initialMode = "login" }: AuthDialogProps)
             <Button type="button" variant="outline" onClick={switchMode}>
               {mode === "login" ? "Create Account" : "Sign In Instead"}
             </Button>
-            <Button type="submit" isLoading={isLoading}>
-              {mode === "login" ? "Sign In" : "Create Account"}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Processing..." : mode === "login" ? "Sign In" : "Create Account"}
             </Button>
           </div>
         </form>
