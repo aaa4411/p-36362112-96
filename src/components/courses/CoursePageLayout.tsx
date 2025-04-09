@@ -3,7 +3,7 @@ import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SkipToContent from "@/components/SkipToContent";
-import { CourseComparisonBar } from "./CourseComparisonBar";
+import CourseComparisonBar from "./CourseComparisonBar";
 import CourseComparison from "@/components/CourseComparison";
 import { FeaturedCourse } from "@/components/FeaturedCourse";
 import CourseBanner from "./CourseBanner";
